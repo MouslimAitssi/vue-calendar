@@ -1,36 +1,47 @@
 <template>
-  <v-simple-table>
-    <template v-slot:default>
-      <thead>
-        <tr>
-          <th></th>
-          <th v-for="day in days" :key="day" class="text-left">
-            {{day}}
-          </th>
-          <th>
-            Sélectionner tout
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="row in rows"
-          :key="row"
-        >
-          <td>{{row}}</td>
-          <td
-            v-for="day in days"
-            :key="row + day"
-            @click="toggle(row, day)"
-            v-bind:class="(isWeekend(day) ? 'gray-cell' : '') + ' ' + (getValue(row, day) !== ''&&!isWeekend(day) ? 'selected-cell' : '')"
+  <div>
+    <v-simple-table>
+      <template v-slot:default>
+        <thead>
+          <tr>
+            <th></th>
+            <th v-for="day in days" :key="day" class="text-left">
+              {{day}}
+            </th>
+            <th>
+              Sélectionner tout
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="row in rows"
+            :key="row"
           >
-            {{ getValue(row, day) }}
-          </td>
-          <td @click="selectAll(row)"></td>
-        </tr>
-      </tbody>
-    </template>
-  </v-simple-table>
+            <td>{{row}}</td>
+            <td
+              v-for="day in days"
+              :key="row + day"
+              @click="toggle(row, day)"
+              v-bind:class="(isWeekend(day) ? 'gray-cell' : '') + ' ' + (getValue(row, day) !== ''&&!isWeekend(day) ? 'selected-cell' : '')"
+            >
+              {{ getValue(row, day) }}
+            </td>
+            <td @click="selectAll(row)"></td>
+          </tr>
+        </tbody>
+      </template>
+    </v-simple-table>
+    <div v-for="row in rows" :key="'value' + row">
+      <h5>Total des {{row}}: {{countValues(row)}}</h5>
+    </div>
+    <v-snackbar
+      v-model="isSnackbarOpen"
+      :timeout="snackbarTimeout"
+    >
+      {{snackbarText}}
+    </v-snackbar>
+  </div>
 </template>
 
 <script>
@@ -51,16 +62,31 @@
 
         values: [],
 
+        isSnackbarOpen: false,
+        snackbarTimeout: 1000,
+        snackbarText: 'Impossible de sélectionner cette case'
       }
     },
-    created () {
-        this.fillvaluesWithZeros();
-        for (let i = 1; i < this.NUMBER_OF_DAYS; i++) {
-          this.days.push(i);
+    created() {
+      this.fillvaluesWithZeros();
+      for (let i = 1; i < this.NUMBER_OF_DAYS; i++) {
+        this.days.push(i);
+      }
+    },
+    methods: {
+      isSelectable(row, day){
+        if(!this.isWeekend(day)) {
+          let arr = this.rows.filter(item => item !== row);
+          for (let i = 0; i < arr.length; i++) {
+            if(this.getValue(arr[i], day) !=='') {
+              return false;
+            }
+          }
+          return true;
         }
-        console.log(this.values);
+        return false;
       },
-    methods: { 
+
       fillvaluesWithZeros() {
         this.rows.map((row) => {
           let arr = []
@@ -70,7 +96,7 @@
           this.values.push([row, arr]);
         });
       },
-      
+
       getValue(row, day) {
         if(!this.isWeekend(day)) {
           for (let index = 0; index < this.values.length; index++) {
@@ -103,6 +129,7 @@
       },
       
       toggle(row, day) {
+        if(this.isSelectable(row, day)) {
           let vals = Object.create(this.values);
           for (let index = 0; index < vals.length; index++) {
             if(vals[index][0] === row) {
@@ -111,6 +138,10 @@
             }
           }
           this.values = vals;
+        }
+        else {
+          this.isSnackbarOpen = true;
+        }
       },
 
       isWeekend(day) {
@@ -164,4 +195,5 @@
   .selected-cell {
     background-color: greenyellow;
   }
+
 </style>
