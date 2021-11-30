@@ -49,17 +49,22 @@
   import axios from 'axios';
   export default {
     name: 'BasicTable',
+    props: {
+      start_at: Number,
+      end_at: Number,
+      user_id: String,
+      user_name: String,
+      mission_id: String,
+      weekends: Array
+    },
     data () {
       return {
-        //Number of days depends on month
-        NUMBER_OF_DAYS: 31,
 
         days: [],
 
         //The weekends are configurable here
-        weekends: [6, 7, 13, 14, 20, 21, 27, 28],
 
-        //The this.rows are configurable here
+        //The rows are configurable here
         rows: [ 'Missions', 'Congés', 'Maladies' ],
 
         values: [],
@@ -71,7 +76,7 @@
     },
     created() {
       this.fillvaluesWithZeros();
-      for (let i = 1; i <= this.NUMBER_OF_DAYS; i++) {
+      for (let i = this.start_at; i <= this.end_at; i++) {
         this.days.push(i);
       }
     },
@@ -92,7 +97,7 @@
       fillvaluesWithZeros() {
         this.rows.map((row) => {
           let arr = []
-          for (let i = 1; i <= this.NUMBER_OF_DAYS; i++) {
+          for (let i = this.start_at; i <= this.end_at; i++) {
             arr.push(0)
           }
           this.values.push([row, arr]);
@@ -159,7 +164,7 @@
       selectAll(row) {
         for (let index = 0; index < this.values.length; index++) {
           if(this.values[index][0] === row) {
-            for (let i = 1; i <= this.NUMBER_OF_DAYS; i++) {
+            for (let i = this.start_at; i <= this.end_at; i++) {
               this.select(row, i)
             }
             break;
@@ -171,7 +176,7 @@
         let c = 0;
         for (let index = 0; index < this.values.length; index++) {
           if(this.values[index][0] === row) {
-            for (let i = 0; i < this.NUMBER_OF_DAYS; i++) {
+            for (let i = this.start_at; i <= this.end_at; i++) {
               if(this.getValue(row, i)) {
                 c = c + this.getValue(row, i);
               }
@@ -185,8 +190,11 @@
         console.log("values: ", this.values);
         let formData = new FormData();
         this.values.forEach((row) => {
-          formData.append(row[0], row[1])
+          formData.append(row[0], row[1]);
         })
+        formData.append("mission id: ", this.mission_id);
+        formData.append("user id: ", this.user_id);
+        formData.append("user name: ", this.user_name);
         axios({
           method: 'post',
           url: 'https://httpbin.org/post',
