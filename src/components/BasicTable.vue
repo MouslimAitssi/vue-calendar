@@ -22,7 +22,7 @@
             <td
               v-for="day in days"
               :key="row + day"
-              @click="toggle(row, day)"
+              @click="select(row, day)"
               v-bind:class="(isWeekend(day) ? 'gray-cell' : '') + ' ' + (getValue(row, day) !== ''&&!isWeekend(day) ? 'selected-cell' : '')"
             >
               {{ getValue(row, day) }}
@@ -35,6 +35,7 @@
     <div v-for="row in rows" :key="'value' + row">
       <h5>Total des {{row}}: {{countValues(row)}}</h5>
     </div>
+    <button class="btn btn-success" @click="sendInfos()">Envoyer</button>
     <v-snackbar
       v-model="isSnackbarOpen"
       :timeout="snackbarTimeout"
@@ -69,7 +70,7 @@
     },
     created() {
       this.fillvaluesWithZeros();
-      for (let i = 1; i < this.NUMBER_OF_DAYS; i++) {
+      for (let i = 1; i <= this.NUMBER_OF_DAYS; i++) {
         this.days.push(i);
       }
     },
@@ -90,7 +91,7 @@
       fillvaluesWithZeros() {
         this.rows.map((row) => {
           let arr = []
-          for (let i = 1; i < this.NUMBER_OF_DAYS; i++) {
+          for (let i = 1; i <= this.NUMBER_OF_DAYS; i++) {
             arr.push(0)
           }
           this.values.push([row, arr]);
@@ -98,7 +99,6 @@
       },
 
       getValue(row, day) {
-        if(!this.isWeekend(day)) {
           for (let index = 0; index < this.values.length; index++) {
             if(this.values[index][0] === row) {
               if(this.values[index][1][day - 1] !==0) {
@@ -110,7 +110,6 @@
           }
 
           return '';
-        }
       },
 
       nextValue(prevValue) {
@@ -129,15 +128,20 @@
       },
       
       toggle(row, day) {
-        if(this.isSelectable(row, day)) {
           let vals = Object.create(this.values);
           for (let index = 0; index < vals.length; index++) {
-            if(vals[index][0] === row) {
+            if(this.values[index][0] === row) {
               vals[index][1][day - 1] = this.nextValue(vals[index][1][day - 1]);
               break;
             }
           }
           this.values = vals;
+
+      },
+
+      select(row, day) {
+        if(this.isSelectable(row, day)) {
+          this.toggle(row, day);
         }
         else {
           this.isSnackbarOpen = true;
@@ -151,23 +155,16 @@
         return true;
       },
 
-
       selectAll(row) {
-        let vals = Object.create(this.values);
-        for (let index = 0; index < vals.length; index++) {
-          if(vals[index][0] === row) {
-            for (let i = 0; i < this.NUMBER_OF_DAYS; i++) {
-              if(!(this.isWeekend(vals[index][1][i - 1]) === '')) {
-                vals[index][1][i - 1] = 1;
-              }
-              else {
-                vals[index][1][i - 1] = 0;
-              }
+        //let vals = Object.create(this.values);
+        for (let index = 0; index < this.values.length; index++) {
+          if(this.values[index][0] === row) {
+            for (let i = 1; i <= this.NUMBER_OF_DAYS; i++) {
+              this.select(row, i)
             }
             break;
           }
         }
-        this.values = vals;
       },
 
       countValues(row) {
@@ -182,6 +179,10 @@
             return c;
           }
         }
+      },
+
+      sendInfos() {
+        console.log(this.values);
       }
     }
   }
@@ -194,6 +195,12 @@
 
   .selected-cell {
     background-color: greenyellow;
+  }
+
+  .btn {
+    position: absolute;
+    right: 1%;
+    bottom: 1%;
   }
 
 </style>
