@@ -46,6 +46,7 @@
 </template>
 
 <script>
+  import axios from 'axios';
   export default {
     name: 'BasicTable',
     data () {
@@ -156,7 +157,6 @@
       },
 
       selectAll(row) {
-        //let vals = Object.create(this.values);
         for (let index = 0; index < this.values.length; index++) {
           if(this.values[index][0] === row) {
             for (let i = 1; i <= this.NUMBER_OF_DAYS; i++) {
@@ -182,7 +182,18 @@
       },
 
       sendInfos() {
-        console.log(this.values);
+        console.log("values: ", this.values);
+        let formData = new FormData();
+        this.values.forEach((row) => {
+          formData.append(row[0], row[1])
+        })
+        axios({
+          method: 'post',
+          url: 'https://httpbin.org/post',
+          data: formData
+        }).then((res)=> {
+          console.log(res.data.form);
+        });
       }
     }
   }
