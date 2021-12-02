@@ -18,7 +18,7 @@
       user_name: "user name",
       mission_id: "mission id",
       start_at: 1,
-      end_at: 20,
+      end_at: 10,
       weekends: [6, 7, 13, 14, 20, 21, 27, 28],
     }),
   };
