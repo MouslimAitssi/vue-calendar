@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <BasicTable :start_at="this.start_at" :end_at="this.end_at" :mission_id="this.mission_id" :user_id="this.user_id" :user_name="this.user_name" :weekends="this.weekends"/>
+    <BasicTable :injectedData="this.checkInjectedData()"/>
   </div>
 </template>
 
@@ -14,12 +14,32 @@
     },
 
     data: () => ({
-      user_id: "user id",
-      user_name: "user name",
-      mission_id: "mission id",
-      start_at: 1,
-      end_at: 10,
-      weekends: [6, 7, 13, 14, 20, 21, 27, 28],
+      
+      //The rows are configurable here
+      injectedData: {
+        rows: [ 'Mission', 'Congés', 'Maladies' ],
+        user_name: "user name",
+        mission_id: "mission id",
+        start_at: 1,
+        end_at: 31,
+        weekends: [6, 7, 13, 14, 20, 21, 27, 28],
+        values: {
+          'Mission': [1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          'Congés': [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          'Maladies': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        },
+        mode: "create",//create, edit, review
+        user_id: "5"
+      },
     }),
+
+    methods: {
+      checkInjectedData() {
+        if(this.injectedData) {
+          return this.injectedData;
+        }
+        return null;
+      }
+    }
   };
 </script>
