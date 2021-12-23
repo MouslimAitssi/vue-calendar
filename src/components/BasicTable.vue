@@ -133,7 +133,8 @@
       this.rows = this.injectedData.rows;
       if(this.injectedData.mode !=="create") {
         Object.keys(this.injectedData.values).forEach((key) => {
-          this.values.push([key, this.injectedData.values[key]]);
+          //console.log(typeof key)
+          this.values.push([key, this.goBack(this.injectedData.values[key])]);
         })
         console.log(this.values);
       }
@@ -162,17 +163,34 @@
         this.rows.map((row) => {
           let arr = []
           for (let i = this.injectedData.start_at; i <= this.injectedData.end_at; i++) {
-            arr.push(0)
+            arr.push([i, 0])
           }
           this.values.push([row, arr]);
         });
       },
 
+      transform(arr) {
+        let dict = {}
+        for (let i = 1; i<=arr.length; i++) {
+
+              dict[i] = arr[i-1][1];
+          }
+          return dict;
+      },
+
+      goBack(obj) {
+        let arr = []
+        Object.keys(obj).forEach((key) => {
+            arr.push([parseInt(key), parseInt(obj[key])]);
+        })
+        return arr;
+      },
+
       getValue(row, day) {
           for (let index = 0; index < this.values.length; index++) {
             if(this.values[index][0] === row) {
-              if(this.values[index][1][day - 1] !==0) {
-                return this.values[index][1][day - 1];
+              if(this.values[index][1][day - 1][1] !==0) {
+                return this.values[index][1][day - 1][1];
               }
               // Rendering blank rather than 0
               return '';
@@ -200,7 +218,7 @@
           let vals = Object.create(this.values);
           for (let index = 0; index < vals.length; index++) {
             if(this.values[index][0] === row) {
-              vals[index][1][day - 1] = this.nextValue(vals[index][1][day - 1]);
+              vals[index][1][day - 1][1] = this.nextValue(vals[index][1][day - 1][1]);
               break;
             }
           }
@@ -252,7 +270,8 @@
         console.log("values: ", this.values);
         let formData = new FormData();
         this.values.forEach((row) => {
-          formData.append(row[0], row[1]);
+          console.log(row[0] + ": " + JSON.stringify(this.transform(row[1])));
+          formData.append(row[0], JSON.stringify(this.transform(row[1])));
         })
         formData.append("mission id: ", this.injectedData.mission_id);
         formData.append("user id: ", this.injectedData.user_id);
